@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+
 import 'db_helper.dart';
 import 'connectivity_service.dart';
-import 'sync_service.dart';
+
 import 'camp_patients_screen.dart';
 import 'dart:ui';
 import 'login_screen.dart';
@@ -367,12 +367,12 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(14),
 
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: .3)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.2),
+                  color: Colors.black.withValues(alpha: .2),
                   blurRadius: 10,
                   offset: const Offset(0, 6),
                 ),
@@ -417,7 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.8),
+                        color: Colors.orange.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
