@@ -7,9 +7,10 @@
 
     <application
         android:label="smart_healthcare_app"
+        android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-
+        
         <activity
             android:name=".MainActivity"
             android:exported="true"

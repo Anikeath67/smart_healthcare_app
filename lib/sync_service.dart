@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'db_helper.dart';
 
 class SyncService {
-  static const String BASE_URL = "http: 192.168.1.18:3000";
+  static const String BASE_URL = "http://192.168.43.218:3000";
 
   static Future<void> syncCamp(int campId) async {
     final db = await DBHelper.database;
@@ -16,21 +16,41 @@ class SyncService {
 
     for (var patient in unsynced) {
       try {
-        final res = await http.post(
+        print("🔄 Syncing: ${patient["name"]}");
+
+        final response = await http.post(
           Uri.parse("$BASE_URL/addPatient"),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode(patient),
-        );
+          body: jsonEncode({
+            "name": patient["name"],
+            "age": patient["age"],
+            "symptoms": patient["symptoms"],
+            "diagnosis": patient["diagnosis"],
+            "medicines": patient["medicines"],
+            "advice": patient["advice"],
+            // ✅ FIX: ISO date format
+            "visit_date": DateTime.parse(patient["visit_date"].toString())
+    .toIso8601String(),
+          }),
+        ).timeout(const Duration(seconds: 10));
 
-        if (res.statusCode == 200) {
+        print("✅ Status: ${response.statusCode}");
+        print("📦 Body: ${response.body}");
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
           await db.update(
             "patients",
             {"synced": 1},
             where: "id=?",
             whereArgs: [patient["id"]],
           );
+          print("✔ Synced successfully");
+        } else {
+          print("❌ Server error");
         }
-      } catch (_) {}
+      } catch (e) {
+        print("❌ Sync failed: $e");
+      }
     }
   }
 

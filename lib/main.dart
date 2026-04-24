@@ -4,6 +4,8 @@ import 'db_helper.dart';
 import 'connectivity_service.dart';
 import 'sync_service.dart';
 import 'camp_patients_screen.dart';
+import 'dart:ui';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -133,32 +135,66 @@ Widget dashboard() {
     },
   );
 }
-
 Widget dashCard(String title, String value, IconData icon, Color color) {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.15),
-          blurRadius: 12,
-          offset: const Offset(0, 6),
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(18),
+
+    child: BackdropFilter(
+      filter: ImageFilter.blur(
+        sigmaX: 10,
+        sigmaY: 10,
+      ),
+
+      child: Container(
+        padding: const EdgeInsets.all(16),
+
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15), // transparent panel
+
+          borderRadius: BorderRadius.circular(18),
+
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+          ),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Column(
-      children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            Icon(icon, color: color, size: 28),
+
+            const SizedBox(height: 8),
+
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(title, style: const TextStyle(color: Colors.grey)),
-      ],
+      ),
     ),
   );
 }
@@ -186,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
               field(name, "Camp Name"),
               field(location, "Location"),
               field(doctor, "Doctor"),
-              field(notes, "Notes"),
+              field(notes, "Notes", maxLines: 4),
             ],
           ),
         ),
@@ -231,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xff4facfe), Color(0xff00f2fe)],
+            colors: [Color.fromARGB(255, 54, 98, 136 ), Color.fromARGB(255, 106, 118, 129)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -274,11 +310,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 16),
 
-                // dashboard(),
-
-                //const SizedBox(height: 16),
-
-                // 🔍 SEARCH CAMPS
                 TextField(
                   controller: searchController,
                   onChanged: (_) => setState(() {}),
@@ -322,90 +353,125 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget campCard(Map camp) {
-    return FutureBuilder<int>(
-      future: DBHelper.pendingSyncCount(camp["id"]),
-      builder: (context, snapshot) {
-        int pending = snapshot.data ?? 0;
+  return FutureBuilder<int>(
+    future: DBHelper.pendingSyncCount(camp["id"]),
+    builder: (context, snapshot) {
+      int pending = snapshot.data ?? 0;
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(.1),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: 10,
+            sigmaY: 10,
           ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            title: Text(
-              camp["name"],
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text("📍 ${camp["location"] ?? "Unknown"}"),
-                if (camp["doctor"] != null) Text("👨‍⚕️ ${camp["doctor"]}"),
-                if (pending > 0)
-                  Container(
-                    margin: const EdgeInsets.only(top: 6),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      "$pending pending sync",
-                      style: const TextStyle(color: Colors.orange),
-                    ),
-                  ),
-              ],
-            ),
 
-            // open patients inside this camp
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CampPatientsScreen(camp: camp),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(14),
+
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+
+              borderRadius: BorderRadius.circular(18),
+
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+              ),
+
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 6),
                 ),
-              ).then((_) => setState(() {}));
-            },
-
-            trailing: PopupMenuButton(
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: "edit", child: Text("Edit")),
-                PopupMenuItem(value: "delete", child: Text("Delete")),
               ],
-              onSelected: (value) async {
-                if (value == "edit") {
-                  addOrEditCamp(camp: camp);
-                } else {
-                  await DBHelper.deleteCamp(camp["id"]);
-                  setState(() {});
-                }
+            ),
+
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Colors.teal,
+                child: Icon(Icons.local_hospital, color: Colors.white),
+              ),
+
+              title: Text(
+                camp["name"],
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+
+                  Text(
+                    "📍 ${camp["location"] ?? "Unknown"}",
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+
+                  if (camp["doctor"] != null)
+                    Text(
+                      "👨‍⚕️ ${camp["doctor"]}",
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+
+                  if (pending > 0)
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        "$pending pending sync",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 16,
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CampPatientsScreen(camp: camp),
+                  ),
+                ).then((_) => setState(() {}));
               },
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget field(TextEditingController c, String label) {
+        ),
+      );
+    },
+  );
+}
+    
+  Widget field(TextEditingController c, String label, {int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: TextField(
         controller: c,
+        maxLines: maxLines,
+        keyboardType: maxLines > 1
+            ? TextInputType.multiline
+            : TextInputType.text,
         decoration: InputDecoration(labelText: label),
       ),
     );
@@ -429,8 +495,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       body: Column(
         children: [
-
-          // 🌈 GRADIENT HEADER
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
@@ -438,9 +502,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               gradient: LinearGradient(
                 colors: [Color(0xff4facfe), Color(0xff00f2fe)],
               ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(30),
-              ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,9 +510,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 const Text(
                   "Camp Calendar",
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -463,27 +526,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           const SizedBox(height: 10),
 
-          // 📅 CALENDAR CARD
           Padding(
             padding: const EdgeInsets.all(12),
             child: Card(
               elevation: 6,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: TableCalendar(
                 focusedDay: today,
                 firstDay: DateTime(2020),
                 lastDay: DateTime(2035),
-
-                selectedDayPredicate: (day) =>
-                    isSameDay(day, today),
-
+                selectedDayPredicate: (day) => isSameDay(day, today),
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
                     today = selectedDay;
                   });
                 },
-
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
                     color: Colors.teal.shade300,
@@ -493,15 +552,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     color: Colors.blue,
                     shape: BoxShape.circle,
                   ),
-                  weekendTextStyle:
-                      const TextStyle(color: Colors.redAccent),
+                  weekendTextStyle: const TextStyle(color: Colors.redAccent),
                 ),
-
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
                   titleTextStyle: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -509,19 +568,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           const SizedBox(height: 10),
 
-          // 📋 SELECTED DATE CARD
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: ListTile(
-                leading: const Icon(Icons.event_available,
-                    color: Colors.teal),
+                leading: const Icon(Icons.event_available, color: Colors.teal),
                 title: const Text("Selected Date"),
-                subtitle:
-                    Text("${today.day}-${today.month}-${today.year}"),
+                subtitle: Text("${today.day}-${today.month}-${today.year}"),
               ),
             ),
           ),
@@ -533,8 +590,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 //////////////////// PROFILE ////////////////////
 
-//import 'package:flutter/material.dart';
-//import 'db_helper.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -543,8 +599,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
   final name = TextEditingController();
-  //  final hospital = TextEditingController();
   final qualification = TextEditingController();
   final specialization = TextEditingController();
   final experience = TextEditingController();
@@ -564,7 +620,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (data != null) {
       name.text = data["doctor_name"] ?? "";
-      //hospital.text = data["hospital"] ?? "";
       qualification.text = data["qualification"] ?? "";
       specialization.text = data["specialization"] ?? "";
       experience.text = data["experience"] ?? "";
@@ -577,7 +632,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> saveProfile() async {
     await DBHelper.saveProfile({
       "doctor_name": name.text,
-      // "hospital": hospital.text,
       "qualification": qualification.text,
       "specialization": specialization.text,
       "experience": experience.text,
@@ -587,36 +641,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => editMode = false);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Profile Saved")));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Profile Saved")));
   }
 
   void cancelEdit() {
     editMode = false;
-    loadProfile(); // reload old data
+    loadProfile();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xff43cea2), Color(0xff185a9d)],
+            colors: [
+              Color.fromARGB(255, 54, 98, 136),
+              Color.fromARGB(255, 106, 118, 129),
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
+
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+
+            const SizedBox(height: 40),
+
+            /// DOCTOR AVATAR
+            Center(
+              child: Column(
+                children: [
+
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 12,
+                          color: Colors.black.withOpacity(.3),
+                        )
+                      ],
+                    ),
+                    child: const CircleAvatar(
+                      radius: 45,
+                      backgroundColor: Colors.teal,
+                      child: Icon(
+                        Icons.medical_services,
+                        size: 45,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Text(
+                    name.text.isEmpty ? "Dr. Profile" : name.text,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const Text(
+                    "Healthcare Camp System",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 30),
 
-            /// TOP ACTION BUTTONS
+            /// EDIT BUTTON
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+
                 if (editMode)
                   TextButton(
                     onPressed: cancelEdit,
@@ -625,8 +735,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
+
                 ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                  ),
                   icon: Icon(editMode ? Icons.save : Icons.edit),
                   label: Text(editMode ? "Save" : "Edit"),
                   onPressed: () {
@@ -640,69 +753,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
-            /// PROFILE ICON
-            const CircleAvatar(
-              radius: 45,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 50, color: Colors.teal),
-            ),
+            /// GLASS PANEL
+            ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 10,
+                  sigmaY: 10,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                    ),
+                  ),
 
-            const SizedBox(height: 15),
+                  child: Column(
+                    children: [
 
-            const Center(
-              child: Text(
-                "MAX CARE  ",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 17, 7, 7),
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                      profileField(name, "Doctor Name", Icons.person),
+
+                      profileField(
+                          qualification,
+                          "Qualification",
+                          Icons.school),
+
+                      profileField(
+                          specialization,
+                          "Specialization",
+                          Icons.medical_services),
+
+                      profileField(
+                          experience,
+                          "Experience",
+                          Icons.timeline),
+
+                      profileField(
+                          phone,
+                          "Phone Number",
+                          Icons.phone),
+
+                      profileField(
+                          address,
+                          "Address",
+                          Icons.location_on,
+                          maxLines: 3),
+                    ],
+                  ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 25),
-
-            profileField(name, "Doctor Name"),
-            //  profileField(hospital, "Hospital Name"),
-            profileField(qualification, "Qualification"),
-            profileField(specialization, "Specialization"),
-            profileField(experience, "Experience"),
-            profileField(phone, "Phone Number"),
-            profileField(address, "Address"),
-
-            const SizedBox(height: 20),
+            const SizedBox(height: 80),
           ],
         ),
       ),
     );
   }
 
-  Widget profileField(TextEditingController controller, String label) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.only(bottom: 14),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+  Widget profileField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    int maxLines = 1,
+  }) {
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
         controller: controller,
         enabled: editMode,
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w500,
-        ),
+        maxLines: maxLines,
+        style: const TextStyle(color: Colors.white),
+
         decoration: InputDecoration(
+          prefixIcon: Icon(icon, color: Colors.white),
           labelText: label,
-          labelStyle: const TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
+          labelStyle: const TextStyle(color: Colors.white70),
+
           filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.all(14),
+          fillColor: Colors.white.withOpacity(0.08),
+
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
+          ),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.white.withOpacity(0.2),
+            ),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(
+              color: Colors.white,
+            ),
           ),
         ),
       ),
