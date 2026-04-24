@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'db_helper.dart';
 
 class SyncService {
-  static const String BASE_URL = "http://192.168.43.218:3000";
+  static const String BASE_URL = "http://192.168.1.3:3000";
 
   static Future<void> syncCamp(int campId) async {
     final db = await DBHelper.database;
@@ -18,21 +18,25 @@ class SyncService {
       try {
         print("🔄 Syncing: ${patient["name"]}");
 
-        final response = await http.post(
-          Uri.parse("$BASE_URL/addPatient"),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "name": patient["name"],
-            "age": patient["age"],
-            "symptoms": patient["symptoms"],
-            "diagnosis": patient["diagnosis"],
-            "medicines": patient["medicines"],
-            "advice": patient["advice"],
-            // ✅ FIX: ISO date format
-            "visit_date": DateTime.parse(patient["visit_date"].toString())
-    .toIso8601String(),
-          }),
-        ).timeout(const Duration(seconds: 10));
+        final response = await http
+            .post(
+              Uri.parse("$BASE_URL/addPatient"),
+              headers: {"Content-Type": "application/json"},
+              body: jsonEncode({
+                "camp_id": patient["camp_id"],
+                "name": patient["name"],
+                "age": patient["age"],
+                "symptoms": patient["symptoms"],
+                "diagnosis": patient["diagnosis"],
+                "medicines": patient["medicines"],
+                "advice": patient["advice"],
+                // ✅ FIX: ISO date format
+                "visit_date": DateTime.parse(
+                  patient["visit_date"].toString(),
+                ).toIso8601String(),
+              }),
+            )
+            .timeout(const Duration(seconds: 10));
 
         print("✅ Status: ${response.statusCode}");
         print("📦 Body: ${response.body}");

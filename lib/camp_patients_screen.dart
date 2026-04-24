@@ -21,138 +21,126 @@ class _CampPatientsScreenState extends State<CampPatientsScreen> {
   }
 
   // ================= ADD / EDIT PATIENT =================
-Future<void> addOrEditPatient({Map? patient}) async {
+  Future<void> addOrEditPatient({Map? patient}) async {
+    final name = TextEditingController(text: patient?["name"]);
+    final age = TextEditingController(text: patient?["age"]?.toString());
+    final symptoms = TextEditingController(text: patient?["symptoms"]);
+    final diagnosis = TextEditingController(text: patient?["diagnosis"]);
+    final medicines = TextEditingController(text: patient?["medicines"]);
+    final advice = TextEditingController(text: patient?["advice"]);
 
-  final name = TextEditingController(text: patient?["name"]);
-  final age = TextEditingController(text: patient?["age"]?.toString());
-  final symptoms = TextEditingController(text: patient?["symptoms"]);
-  final diagnosis = TextEditingController(text: patient?["diagnosis"]);
-  final medicines = TextEditingController(text: patient?["medicines"]);
-  final advice = TextEditingController(text: patient?["advice"]);
-
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (_) {
-
-      return Container(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(30),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Container(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
-        ),
 
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
 
-              /// HANDLE BAR
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-
-              /// TITLE
-              Text(
-                patient == null ? "Add Patient" : "Edit Patient",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// FORM FIELDS
-
-              field(name, "Patient Name"),
-              field(age, "Age"),
-              field(symptoms, "Symptoms", maxLines: 4),
-              field(diagnosis, "Diagnosis", maxLines: 4),
-              field(medicines, "Medicines", maxLines: 3),
-              field(advice, "Advice"),
-
-              const SizedBox(height: 25),
-
-              /// SAVE BUTTON
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text("Save Patient"),
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// HANDLE BAR
+                Center(
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-
-                  onPressed: () async {
-
-                    if (name.text.isEmpty) return;
-
-                    if (patient == null) {
-
-                      await DBHelper.insertPatient({
-                        "camp_id": widget.camp["id"],
-                        "name": name.text,
-                        "age": int.tryParse(age.text) ?? 0,
-                        "symptoms": symptoms.text,
-                        "diagnosis": diagnosis.text,
-                        "medicines": medicines.text,
-                        "advice": advice.text,
-                        "visit_date": DateTime.now().toString(),
-                        "synced": 0,
-                      });
-
-                    } else {
-
-                      await DBHelper.updatePatient(patient["id"], {
-                        "name": name.text,
-                        "age": int.tryParse(age.text) ?? 0,
-                        "symptoms": symptoms.text,
-                        "diagnosis": diagnosis.text,
-                        "medicines": medicines.text,
-                        "advice": advice.text,
-                        "synced": 0,
-                      });
-
-                    }
-
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
                 ),
-              ),
 
-              const SizedBox(height: 10),
-            ],
+                /// TITLE
+                Text(
+                  patient == null ? "Add Patient" : "Edit Patient",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// FORM FIELDS
+                field(name, "Patient Name"),
+                field(age, "Age"),
+                field(symptoms, "Symptoms", maxLines: 4),
+                field(diagnosis, "Diagnosis", maxLines: 4),
+                field(medicines, "Medicines", maxLines: 3),
+                field(advice, "Advice"),
+
+                const SizedBox(height: 25),
+
+                /// SAVE BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text("Save Patient"),
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+
+                    onPressed: () async {
+                      if (name.text.isEmpty) return;
+
+                      if (patient == null) {
+                        await DBHelper.insertPatient({
+                          "camp_id": widget.camp["id"],
+                          "name": name.text,
+                          "age": int.tryParse(age.text) ?? 0,
+                          "symptoms": symptoms.text,
+                          "diagnosis": diagnosis.text,
+                          "medicines": medicines.text,
+                          "advice": advice.text,
+                          "visit_date": DateTime.now().toString(),
+                          "synced": 0,
+                        });
+                      } else {
+                        await DBHelper.updatePatient(patient["id"], {
+                          "name": name.text,
+                          "age": int.tryParse(age.text) ?? 0,
+                          "symptoms": symptoms.text,
+                          "diagnosis": diagnosis.text,
+                          "medicines": medicines.text,
+                          "advice": advice.text,
+                          "synced": 0,
+                        });
+                      }
+
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   // ================= DELETE =================
 
@@ -167,9 +155,7 @@ Future<void> addOrEditPatient({Map? patient}) async {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(p["name"]),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -191,22 +177,19 @@ Future<void> addOrEditPatient({Map? patient}) async {
     return Scaffold(
       appBar: AppBar(
         title: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    Text(
-      widget.camp["name"],
-      
-      style: const TextStyle(fontSize: 16, color: Colors.white70),
-    ),
-    const Text(
-      "Patient Entries",
-      style: TextStyle(
-        fontSize: 20,
-        color: Colors.white70,
-      ),
-    ),
-  ],
-),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.camp["name"],
+
+              style: const TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+            const Text(
+              "Patient Entries",
+              style: TextStyle(fontSize: 20, color: Colors.white70),
+            ),
+          ],
+        ),
         backgroundColor: const Color.fromARGB(255, 7, 12, 11),
       ),
 
@@ -241,19 +224,17 @@ Future<void> addOrEditPatient({Map? patient}) async {
 
             patients = patients
                 .where(
-                  (p) => (p["name"] ?? "")
-                      .toLowerCase()
-                      .contains(searchController.text.toLowerCase()),
+                  (p) => (p["name"] ?? "").toLowerCase().contains(
+                    searchController.text.toLowerCase(),
+                  ),
                 )
                 .toList();
 
             return Column(
               children: [
-
                 const SizedBox(height: 10),
 
                 // ================= SEARCH BAR =================
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: ClipRRect(
@@ -269,7 +250,8 @@ Future<void> addOrEditPatient({Map? patient}) async {
                           color: Colors.white.withOpacity(.15),
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(
-                              color: Colors.white.withOpacity(.3)),
+                            color: Colors.white.withOpacity(.3),
+                          ),
                         ),
 
                         child: TextField(
@@ -281,8 +263,10 @@ Future<void> addOrEditPatient({Map? patient}) async {
                           decoration: const InputDecoration(
                             hintText: "Search patients...",
                             hintStyle: TextStyle(color: Colors.white70),
-                            prefixIcon:
-                                Icon(Icons.search, color: Colors.white70),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.white70,
+                            ),
                             border: InputBorder.none,
                           ),
                         ),
@@ -294,25 +278,24 @@ Future<void> addOrEditPatient({Map? patient}) async {
                 const SizedBox(height: 10),
 
                 // ================= PATIENT LIST =================
-
                 Expanded(
                   child: ListView.builder(
                     itemCount: patients.length,
                     itemBuilder: (_, i) {
-
                       var p = patients[i];
                       bool pending = p["synced"] == 0;
 
                       return Container(
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
 
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(18),
 
                           child: BackdropFilter(
-                            filter:
-                                ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
 
                             child: Container(
                               padding: const EdgeInsets.all(12),
@@ -321,14 +304,17 @@ Future<void> addOrEditPatient({Map? patient}) async {
                                 color: Colors.white.withOpacity(.15),
                                 borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                    color: Colors.white.withOpacity(.3)),
+                                  color: Colors.white.withOpacity(.3),
+                                ),
                               ),
 
                               child: ListTile(
                                 leading: const CircleAvatar(
                                   backgroundColor: Colors.teal,
-                                  child: Icon(Icons.person,
-                                      color: Colors.white),
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                  ),
                                 ),
 
                                 title: Text(
@@ -340,10 +326,8 @@ Future<void> addOrEditPatient({Map? patient}) async {
                                 ),
 
                                 subtitle: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-
                                     const SizedBox(height: 4),
 
                                     Row(
@@ -359,7 +343,8 @@ Future<void> addOrEditPatient({Map? patient}) async {
                                           child: Text(
                                             p["diagnosis"] ?? "",
                                             style: const TextStyle(
-                                                color: Colors.white70),
+                                              color: Colors.white70,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -367,17 +352,17 @@ Future<void> addOrEditPatient({Map? patient}) async {
 
                                     if (pending)
                                       Container(
-                                        margin:
-                                            const EdgeInsets.only(top: 4),
-                                        padding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 2),
+                                        margin: const EdgeInsets.only(top: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
 
                                         decoration: BoxDecoration(
                                           color: Colors.orange,
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                         ),
 
                                         child: const Text(
@@ -395,11 +380,13 @@ Future<void> addOrEditPatient({Map? patient}) async {
                                   iconColor: Colors.white,
                                   itemBuilder: (_) => const [
                                     PopupMenuItem(
-                                        value: "edit",
-                                        child: Text("Edit")),
+                                      value: "edit",
+                                      child: Text("Edit"),
+                                    ),
                                     PopupMenuItem(
-                                        value: "delete",
-                                        child: Text("Delete")),
+                                      value: "delete",
+                                      child: Text("Delete"),
+                                    ),
                                   ],
 
                                   onSelected: (value) {
@@ -453,9 +440,7 @@ Future<void> addOrEditPatient({Map? patient}) async {
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

@@ -39,21 +39,25 @@ class DBHelper {
           name TEXT,
           age INTEGER,
           symptoms TEXT,
+
+  bp TEXT,
+  temp TEXT,
+  spo2 TEXT,
+  hr TEXT,
           diagnosis TEXT,
           medicines TEXT,
-          dosage TEXT,
           advice TEXT,
           visit_date TEXT,
-          synced INTEGER DEFAULT 0
+          synced INTEGER DEFAULT 0,
+          FOREIGN KEY(camp_id) REFERENCES camps(id)
         )
         ''');
 
-        // DOCTOR PROFILE TABLE
+        // PROFILE TABLE
         await db.execute('''
         CREATE TABLE doctor_profile(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           doctor_name TEXT,
-          hospital TEXT,
           qualification TEXT,
           specialization TEXT,
           experience TEXT,
@@ -85,10 +89,16 @@ class DBHelper {
   static Future deleteCamp(int id) async {
     final db = await database;
 
-    // delete patients under this camp first
     await db.delete("patients", where: "camp_id=?", whereArgs: [id]);
 
     return db.delete("camps", where: "id=?", whereArgs: [id]);
+  }
+
+  // ✅ TOTAL CAMPS
+  static Future<int> getCampCount() async {
+    final db = await database;
+    var result = await db.rawQuery("SELECT COUNT(*) FROM camps");
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
   // ================= PATIENTS =================
@@ -98,10 +108,8 @@ class DBHelper {
     return db.insert("patients", data);
   }
 
-  // ⭐ get patients of selected camp
   static Future<List<Map<String, dynamic>>> getPatients(int campId) async {
     final db = await database;
-
     return db.query(
       "patients",
       where: "camp_id=?",
@@ -120,13 +128,7 @@ class DBHelper {
     return db.delete("patients", where: "id=?", whereArgs: [id]);
   }
 
-  // ================= DASHBOARD COUNTS =================
-
-  static Future<int> getCampCount() async {
-    final db = await database;
-    var result = await db.rawQuery("SELECT COUNT(*) FROM camps");
-    return Sqflite.firstIntValue(result) ?? 0;
-  }
+  // ================= SYNC =================
 
   static Future<int> getTotalPendingSync() async {
     final db = await database;
@@ -136,14 +138,12 @@ class DBHelper {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  // pending sync count per camp
   static Future<int> pendingSyncCount(int campId) async {
     final db = await database;
     var result = await db.rawQuery(
       "SELECT COUNT(*) FROM patients WHERE synced = 0 AND camp_id = ?",
       [campId],
     );
-
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
@@ -171,5 +171,60 @@ class DBHelper {
     var result = await db.query("doctor_profile");
     if (result.isNotEmpty) return result.first;
     return null;
+  }
+
+  // ================= DASHBOARD =================
+
+  // ✅ TOTAL PATIENTS
+  static Future<int> getTotalPatients() async {
+    final db = await database;
+    var result = await db.rawQuery("SELECT COUNT(*) FROM patients");
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // ✅ TODAY VISITS
+  static Future<int> getTodayPatients() async {
+    final db = await database;
+
+    final today = DateTime.now();
+
+    String start =
+        DateTime(today.year, today.month, today.day).toString();
+
+    String end =
+        DateTime(today.year, today.month, today.day, 23, 59, 59).toString();
+
+    var result = await db.rawQuery(
+      "SELECT COUNT(*) FROM patients WHERE visit_date BETWEEN ? AND ?",
+      [start, end],
+    );
+
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // ✅ WEEKLY DATA
+  static Future<List<int>> getWeeklyPatientData() async {
+    final db = await database;
+
+    List<int> data = [];
+
+    for (int i = 6; i >= 0; i--) {
+      final date = DateTime.now().subtract(Duration(days: i));
+
+      String start =
+          DateTime(date.year, date.month, date.day).toString();
+
+      String end =
+          DateTime(date.year, date.month, date.day, 23, 59, 59).toString();
+
+      var result = await db.rawQuery(
+        "SELECT COUNT(*) FROM patients WHERE visit_date BETWEEN ? AND ?",
+        [start, end],
+      );
+
+      data.add(Sqflite.firstIntValue(result) ?? 0);
+    }
+
+    return data;
   }
 }

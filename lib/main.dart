@@ -5,8 +5,8 @@ import 'connectivity_service.dart';
 import 'sync_service.dart';
 import 'camp_patients_screen.dart';
 import 'dart:ui';
-
-
+import 'login_screen.dart';
+import 'dashboard_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DBHelper.database;
@@ -37,7 +37,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int index = 0;
 
-  final pages = const [HomeScreen(), CalendarScreen(), ProfileScreen()];
+   final pages = const [
+  HomeScreen(),
+  DashboardScreen(),
+  ProfileScreen(),
+];
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.calendar_month),
-                label: "Calendar",
+                label: "Dashboard",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person),
@@ -135,15 +139,13 @@ Widget dashboard() {
     },
   );
 }
+
 Widget dashCard(String title, String value, IconData icon, Color color) {
   return ClipRRect(
     borderRadius: BorderRadius.circular(18),
 
     child: BackdropFilter(
-      filter: ImageFilter.blur(
-        sigmaX: 10,
-        sigmaY: 10,
-      ),
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
 
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -153,9 +155,7 @@ Widget dashCard(String title, String value, IconData icon, Color color) {
 
           borderRadius: BorderRadius.circular(18),
 
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.3)),
 
           boxShadow: [
             BoxShadow(
@@ -169,7 +169,6 @@ Widget dashCard(String title, String value, IconData icon, Color color) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             Icon(icon, color: color, size: 28),
 
             const SizedBox(height: 8),
@@ -187,10 +186,7 @@ Widget dashCard(String title, String value, IconData icon, Color color) {
 
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 13,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
           ],
         ),
@@ -267,7 +263,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 54, 98, 136 ), Color.fromARGB(255, 106, 118, 129)],
+            colors: [
+              Color.fromARGB(255, 54, 98, 136),
+              Color.fromARGB(255, 106, 118, 129),
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -351,7 +350,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
   Widget campCard(Map camp) {
   return FutureBuilder<int>(
     future: DBHelper.pendingSyncCount(camp["id"]),
@@ -362,10 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(18),
 
         child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 10,
-            sigmaY: 10,
-          ),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
 
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
@@ -373,13 +368,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.15),
-
               borderRadius: BorderRadius.circular(18),
-
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-              ),
-
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(.2),
@@ -441,10 +431,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
 
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 16,
+              /// ⭐ EDIT / DELETE MENU ADDED
+              trailing: PopupMenuButton(
+                icon: const Icon(
+                  Icons.more_vert,
+                  color: Colors.white,
+                ),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: "edit", child: Text("Edit")),
+                  PopupMenuItem(value: "delete", child: Text("Delete")),
+                ],
+                onSelected: (value) async {
+                  if (value == "edit") {
+                    addOrEditCamp(camp: camp);
+                  } else if (value == "delete") {
+                    await DBHelper.deleteCamp(camp["id"]);
+                    setState(() {});
+                  }
+                },
               ),
 
               onTap: () {
@@ -462,7 +466,6 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   );
 }
-    
   Widget field(TextEditingController c, String label, {int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -480,115 +483,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 //////////////////// CALENDAR ////////////////////
 
-class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
-
-  @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
-}
-
-class _CalendarScreenState extends State<CalendarScreen> {
-  DateTime today = DateTime.now();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xff4facfe), Color(0xff00f2fe)],
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Camp Calendar",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "${today.day} / ${today.month} / ${today.year}",
-                  style: const TextStyle(color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TableCalendar(
-                focusedDay: today,
-                firstDay: DateTime(2020),
-                lastDay: DateTime(2035),
-                selectedDayPredicate: (day) => isSameDay(day, today),
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    today = selectedDay;
-                  });
-                },
-                calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: Colors.teal.shade300,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  weekendTextStyle: const TextStyle(color: Colors.redAccent),
-                ),
-                headerStyle: const HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
-                  titleTextStyle: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.event_available, color: Colors.teal),
-                title: const Text("Selected Date"),
-                subtitle: Text("${today.day}-${today.month}-${today.year}"),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 //////////////////// PROFILE ////////////////////
+
 
 
 class ProfileScreen extends StatefulWidget {
@@ -599,7 +495,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   final name = TextEditingController();
   final qualification = TextEditingController();
   final specialization = TextEditingController();
@@ -641,20 +536,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => editMode = false);
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Profile Saved")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Profile Saved")),
+    );
   }
 
-  void cancelEdit() {
-    editMode = false;
-    loadProfile();
+  void logout() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -668,43 +565,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
 
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
           children: [
-
-            const SizedBox(height: 40),
-
-            /// DOCTOR AVATAR
+            /// PROFILE HEADER
             Center(
               child: Column(
                 children: [
-
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundColor: Colors.teal,
+                    child: const Icon(
+                      Icons.medical_services,
+                      size: 45,
                       color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 12,
-                          color: Colors.black.withOpacity(.3),
-                        )
-                      ],
-                    ),
-                    child: const CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Colors.teal,
-                      child: Icon(
-                        Icons.medical_services,
-                        size: 45,
-                        color: Colors.white,
-                      ),
                     ),
                   ),
 
                   const SizedBox(height: 12),
 
                   Text(
-                    name.text.isEmpty ? "Dr. Profile" : name.text,
+                    name.text.isEmpty ? "Doctor Profile" : name.text,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -726,10 +606,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-
                 if (editMode)
                   TextButton(
-                    onPressed: cancelEdit,
+                    onPressed: () {
+                      editMode = false;
+                      loadProfile();
+                    },
                     child: const Text(
                       "Cancel",
                       style: TextStyle(color: Colors.white),
@@ -755,74 +637,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
-            /// GLASS PANEL
-            ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 10,
-                  sigmaY: 10,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                    ),
-                  ),
-
-                  child: Column(
-                    children: [
-
-                      profileField(name, "Doctor Name", Icons.person),
-
-                      profileField(
-                          qualification,
-                          "Qualification",
-                          Icons.school),
-
-                      profileField(
-                          specialization,
-                          "Specialization",
-                          Icons.medical_services),
-
-                      profileField(
-                          experience,
-                          "Experience",
-                          Icons.timeline),
-
-                      profileField(
-                          phone,
-                          "Phone Number",
-                          Icons.phone),
-
-                      profileField(
-                          address,
-                          "Address",
-                          Icons.location_on,
-                          maxLines: 3),
-                    ],
-                  ),
-                ),
+            /// FORM CARD
+            glassCard(
+              Column(
+                children: [
+                  field(name, "Doctor Name", Icons.person),
+                  field(qualification, "Qualification", Icons.school),
+                  field(
+                      specialization, "Specialization", Icons.medical_services),
+                  field(experience, "Experience", Icons.timeline),
+                  field(phone, "Phone", Icons.phone),
+                  field(address, "Address", Icons.location_on, maxLines: 3),
+                ],
               ),
             ),
 
-            const SizedBox(height: 80),
+            const SizedBox(height: 30),
+
+            /// LOGOUT BUTTON
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.logout),
+                label: const Text("Logout"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: logout,
+              ),
+            ),
+
+            /// 🔥 IMPORTANT FIX (SPACE FOR NAVBAR)
+            const SizedBox(height: 120),
           ],
         ),
       ),
     );
   }
 
-  Widget profileField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    int maxLines = 1,
-  }) {
+  /// GLASS CARD
+  Widget glassCard(Widget child) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withOpacity(0.3)),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
 
+  /// INPUT FIELD
+  Widget field(TextEditingController controller, String label, IconData icon,
+      {int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
@@ -830,32 +708,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         enabled: editMode,
         maxLines: maxLines,
         style: const TextStyle(color: Colors.white),
-
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Colors.white),
           labelText: label,
           labelStyle: const TextStyle(color: Colors.white70),
-
           filled: true,
           fillColor: Colors.white.withOpacity(0.08),
-
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
-          ),
-
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(
-              color: Colors.white.withOpacity(0.2),
-            ),
-          ),
-
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(
-              color: Colors.white,
-            ),
           ),
         ),
       ),
