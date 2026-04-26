@@ -104,35 +104,74 @@ class SyncService {
   }
 
   // ================= PROFILE SYNC =================
+  // static Future<void> syncProfile() async {
+  //   final db = await DBHelper.database;
+
+  //   final profile = await db.query("doctor_profile");
+
+  //   if (profile.isEmpty) return;
+
+  //   final p = profile.first;
+
+  //   try {
+  //     final response = await http.put(
+  //       Uri.parse("$BASE_URL/doctor/${p["doctor_id"]}"),
+  //       headers: {"Content-Type": "application/json"},
+  //       body: jsonEncode({
+  //         "name": p["doctor_name"],
+  //         "qualification": p["qualification"],
+  //         "specialization": p["specialization"],
+  //         "experience": p["experience"],
+  //         "phone": p["phone"],
+  //         "address": p["address"],
+  //       }),
+  //     );
+
+  //     print("Profile sync: ${response.statusCode}");
+  //   } catch (e) {
+  //     print("Profile sync error: $e");
+  //   }
+  // }
   static Future<void> syncProfile() async {
-    final db = await DBHelper.database;
+  final db = await DBHelper.database;
 
-    final profile = await db.query("doctor_profile");
+  final profile = await db.query("doctor_profile");
 
-    if (profile.isEmpty) return;
+  if (profile.isEmpty) return;
 
-    final p = profile.first;
+  final p = profile.first;
+  print("PROFILE DATA: $p"); 
+  try {
+    final response = await http.put(
+      Uri.parse("$BASE_URL/doctor/${p["doctor_id"]}"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "name": p["doctor_name"],
+        "qualification": p["qualification"],
+        "specialization": p["specialization"],
+        "experience": p["experience"],
+        "phone": p["phone"],
+        "address": p["address"],
+      }),
+    );
 
-    try {
-      final response = await http.put(
-        Uri.parse("$BASE_URL/doctor/${p["doctor_id"]}"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "name": p["doctor_name"],
-          "qualification": p["qualification"],
-          "specialization": p["specialization"],
-          "experience": p["experience"],
-          "phone": p["phone"],
-          "address": p["address"],
-        }),
+    print("Profile sync: ${response.statusCode}");
+
+    // ✅ MOVE THIS HERE (INSIDE FUNCTION)
+    if (response.statusCode == 200) {
+      await db.update(
+        "doctor_profile",
+        {"synced": 1},
+        where: "id=?",
+        whereArgs: [p["id"]],
       );
-
-      print("Profile sync: ${response.statusCode}");
-    } catch (e) {
-      print("Profile sync error: $e");
     }
-  }
 
+  } catch (e) {
+    print("Profile sync error: $e");
+  }
+}
+  
   // ================= MAIN SYNC =================
   static Future<void> syncAll() async {
     await syncProfile();     // doctor
