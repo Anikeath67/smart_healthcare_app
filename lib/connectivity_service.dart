@@ -4,10 +4,13 @@ import 'sync_service.dart';
 
 class ConnectivityService {
   static void startListening() {
-    Connectivity().onConnectivityChanged.listen((result) {
+    Connectivity().onConnectivityChanged.listen((result) async {
       if (result != ConnectivityResult.none) {
         debugPrint("Internet connected → auto sync");
-        SyncService.syncAllCamps();
+
+        // 🔥 USE THIS
+        // SyncService.syncAll();
+        await SyncService.syncAll();
       }
     });
   }
