@@ -73,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(25),
           child: BottomNavigationBar(
-            backgroundColor: const Color(0xFF018376),
+            backgroundColor: const Color.fromARGB(255, 169, 178, 187),
             selectedItemColor: Colors.black,
             unselectedItemColor: Colors.white70,
             currentIndex: index,
@@ -125,7 +125,7 @@ Widget dashboard() {
         children: [
           Expanded(
             child: dashCard("Camps", camps.toString(),
-                Icons.local_hospital, Colors.blue),
+                Icons.local_hospital,  Colors.orange),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 70),
         child: FloatingActionButton(
-          backgroundColor: Colors.teal,
+          backgroundColor: const Color.fromARGB(255, 126, 146, 158),
           onPressed: () => addOrEditCamp(),
           child: const Icon(Icons.add),
         ),
@@ -256,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF366288), Color(0xFF6A7681)],
+            colors: [Color.fromARGB(255, 72, 157, 231), Color.fromARGB(255, 93, 155, 212)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -347,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: ListTile(
                 leading: const CircleAvatar(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: Color.fromARGB(255, 165, 187, 202),
                   child: Icon(Icons.local_hospital,
                       color: Colors.white),
                 ),
@@ -535,8 +535,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF018376),
-              Color(0xFF015E57),
+              // Color.fromARGB(255, 58, 120, 179),
+              // Color.fromARGB(255, 214, 218, 217),
+               Color.fromARGB(255, 72, 157, 231), // very light blue
+                Color.fromARGB(255, 124, 190, 221),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -547,7 +549,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.fromLTRB(20, 50, 20, 120),
           children: [
 
-            // 🔷 HEADER
+            //   profile logo
             Center(
               child: Column(
                 children: [
@@ -563,7 +565,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: const CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors.teal,
+                      backgroundColor: Color.fromARGB(255, 165, 186, 202),
                       child: Icon(Icons.person, size: 50, color: Colors.white),
                     ),
                   ),
@@ -591,7 +593,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 25),
 
-            // 🔷 EDIT BUTTON
+            //  edit button 
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -606,7 +608,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
+                    backgroundColor: const Color.fromARGB(221, 203, 203, 204),
                   ),
                   icon: Icon(editMode ? Icons.save : Icons.edit),
                   label: Text(editMode ? "Save" : "Edit"),
@@ -623,7 +625,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // 🔷 PROFESSIONAL INFO
+            // profesion information
             sectionTitle("Professional Info"),
             glassCard(
               Column(
@@ -638,7 +640,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 16),
 
-            // 🔷 CONTACT INFO
+            //  contact
             sectionTitle("Contact Info"),
             glassCard(
               Column(
@@ -651,12 +653,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 30),
 
-            // 🔴 LOGOUT
+            //  logut button grey hai
             ElevatedButton.icon(
               icon: const Icon(Icons.logout),
               label: const Text("Logout"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: const Color.fromARGB(255, 181, 190, 204),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -670,7 +672,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // 🔷 SECTION TITLE
+  
   Widget sectionTitle(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -704,7 +706,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // 🔷 INPUT FIELD
+  
   Widget field(TextEditingController controller, String label, IconData icon,
       {int maxLines = 1}) {
     return Padding(
